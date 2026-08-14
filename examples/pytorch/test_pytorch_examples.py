@@ -1,4 +1,3 @@
-# coding=utf-8
 # Copyright 2018 HuggingFace Inc..
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,6 +48,7 @@ SRC_DIRS = [
         "image-pretraining",
         "semantic-segmentation",
         "object-detection",
+        "instance-segmentation",
     ]
 ]
 sys.path.extend(SRC_DIRS)
@@ -60,6 +60,7 @@ if SRC_DIRS is not None:
     import run_generation
     import run_glue
     import run_image_classification
+    import run_instance_segmentation
     import run_mae
     import run_mlm
     import run_ner
@@ -85,7 +86,7 @@ def get_results(output_dir):
     results = {}
     path = os.path.join(output_dir, "all_results.json")
     if os.path.exists(path):
-        with open(path, "r") as f:
+        with open(path) as f:
             results = json.load(f)
     else:
         raise ValueError(f"can't find {path}")
@@ -103,7 +104,6 @@ class ExamplesTests(TestCasePlus):
             run_glue.py
             --model_name_or_path distilbert/distilbert-base-uncased
             --output_dir {tmp_dir}
-            --overwrite_output_dir
             --train_file ./tests/fixtures/tests_samples/MRPC/train.csv
             --validation_file ./tests/fixtures/tests_samples/MRPC/dev.csv
             --do_train
@@ -139,7 +139,6 @@ class ExamplesTests(TestCasePlus):
             --per_device_eval_batch_size 5
             --num_train_epochs 2
             --output_dir {tmp_dir}
-            --overwrite_output_dir
             """.split()
 
         if backend_device_count(torch_device) > 1:
@@ -187,7 +186,6 @@ class ExamplesTests(TestCasePlus):
             --train_file ./tests/fixtures/sample_text.txt
             --validation_file ./tests/fixtures/sample_text.txt
             --output_dir {tmp_dir}
-            --overwrite_output_dir
             --do_train
             --do_eval
             --prediction_loss_only
@@ -213,7 +211,6 @@ class ExamplesTests(TestCasePlus):
             --train_file tests/fixtures/tests_samples/conll/sample.json
             --validation_file tests/fixtures/tests_samples/conll/sample.json
             --output_dir {tmp_dir}
-            --overwrite_output_dir
             --do_train
             --do_eval
             --warmup_steps=2
@@ -242,7 +239,6 @@ class ExamplesTests(TestCasePlus):
             --train_file tests/fixtures/tests_samples/SQUAD/sample.json
             --validation_file tests/fixtures/tests_samples/SQUAD/sample.json
             --output_dir {tmp_dir}
-            --overwrite_output_dir
             --max_steps=10
             --warmup_steps=2
             --do_train
@@ -270,7 +266,6 @@ class ExamplesTests(TestCasePlus):
             --train_file tests/fixtures/tests_samples/SQUAD/sample.json
             --validation_file tests/fixtures/tests_samples/SQUAD/sample.json
             --output_dir {tmp_dir}
-            --overwrite_output_dir
             --max_steps=10
             --warmup_steps=2
             --do_train
@@ -295,7 +290,6 @@ class ExamplesTests(TestCasePlus):
             --train_file tests/fixtures/tests_samples/swag/sample.json
             --validation_file tests/fixtures/tests_samples/swag/sample.json
             --output_dir {tmp_dir}
-            --overwrite_output_dir
             --max_steps=20
             --warmup_steps=2
             --do_train
@@ -333,7 +327,6 @@ class ExamplesTests(TestCasePlus):
             --train_file tests/fixtures/tests_samples/xsum/sample.json
             --validation_file tests/fixtures/tests_samples/xsum/sample.json
             --output_dir {tmp_dir}
-            --overwrite_output_dir
             --max_steps=50
             --warmup_steps=8
             --do_train
@@ -363,7 +356,6 @@ class ExamplesTests(TestCasePlus):
             --train_file tests/fixtures/tests_samples/wmt16/sample.json
             --validation_file tests/fixtures/tests_samples/wmt16/sample.json
             --output_dir {tmp_dir}
-            --overwrite_output_dir
             --max_steps=50
             --warmup_steps=8
             --do_train
@@ -382,6 +374,7 @@ class ExamplesTests(TestCasePlus):
             result = get_results(tmp_dir)
             self.assertGreaterEqual(result["eval_bleu"], 30)
 
+    @slow
     def test_run_image_classification(self):
         tmp_dir = self.get_auto_remove_tmp_dir()
         testargs = f"""
@@ -395,7 +388,6 @@ class ExamplesTests(TestCasePlus):
             --per_device_train_batch_size 2
             --per_device_eval_batch_size 1
             --remove_unused_columns False
-            --overwrite_output_dir True
             --dataloader_num_workers 16
             --metric_for_best_model accuracy
             --max_steps 10
@@ -412,6 +404,7 @@ class ExamplesTests(TestCasePlus):
             result = get_results(tmp_dir)
             self.assertGreaterEqual(result["eval_accuracy"], 0.8)
 
+    @slow
     def test_run_speech_recognition_ctc(self):
         tmp_dir = self.get_auto_remove_tmp_dir()
         testargs = f"""
@@ -428,7 +421,6 @@ class ExamplesTests(TestCasePlus):
             --per_device_train_batch_size 2
             --per_device_eval_batch_size 1
             --remove_unused_columns False
-            --overwrite_output_dir True
             --preprocessing_num_workers 16
             --max_steps 10
             --seed 42
@@ -458,7 +450,6 @@ class ExamplesTests(TestCasePlus):
             --per_device_train_batch_size 2
             --per_device_eval_batch_size 1
             --remove_unused_columns False
-            --overwrite_output_dir True
             --preprocessing_num_workers 16
             --max_steps 10
             --target_language tur
@@ -490,7 +481,6 @@ class ExamplesTests(TestCasePlus):
             --per_device_train_batch_size 2
             --per_device_eval_batch_size 4
             --remove_unused_columns False
-            --overwrite_output_dir True
             --preprocessing_num_workers 16
             --max_steps 10
             --seed 42
@@ -522,7 +512,6 @@ class ExamplesTests(TestCasePlus):
             --per_device_train_batch_size 2
             --per_device_eval_batch_size 1
             --remove_unused_columns False
-            --overwrite_output_dir True
             --num_train_epochs 10
             --max_steps 50
             --seed 42
@@ -571,7 +560,6 @@ class ExamplesTests(TestCasePlus):
             --per_device_train_batch_size 2
             --per_device_eval_batch_size 1
             --remove_unused_columns False
-            --overwrite_output_dir True
             --dataloader_num_workers 16
             --metric_for_best_model accuracy
             --max_steps 10
@@ -587,6 +575,7 @@ class ExamplesTests(TestCasePlus):
             model = ViTMAEForPreTraining.from_pretrained(tmp_dir)
             self.assertIsNotNone(model)
 
+    @slow
     def test_run_semantic_segmentation(self):
         tmp_dir = self.get_auto_remove_tmp_dir()
         testargs = f"""
@@ -596,7 +585,6 @@ class ExamplesTests(TestCasePlus):
             --do_train
             --do_eval
             --remove_unused_columns False
-            --overwrite_output_dir True
             --max_steps 10
             --learning_rate=2e-4
             --per_device_train_batch_size=2
@@ -612,6 +600,7 @@ class ExamplesTests(TestCasePlus):
             result = get_results(tmp_dir)
             self.assertGreaterEqual(result["eval_overall_accuracy"], 0.1)
 
+    @slow
     @patch.dict(os.environ, {"WANDB_DISABLED": "true"})
     def test_run_object_detection(self):
         tmp_dir = self.get_auto_remove_tmp_dir()
@@ -623,7 +612,6 @@ class ExamplesTests(TestCasePlus):
             --do_train
             --do_eval
             --remove_unused_columns False
-            --overwrite_output_dir True
             --eval_do_concat_batches False
             --max_steps 10
             --learning_rate=1e-6
@@ -637,5 +625,36 @@ class ExamplesTests(TestCasePlus):
 
         with patch.object(sys, "argv", testargs):
             run_object_detection.main()
+            result = get_results(tmp_dir)
+            self.assertGreaterEqual(result["test_map"], 0.1)
+
+    @slow
+    @patch.dict(os.environ, {"WANDB_DISABLED": "true"})
+    def test_run_instance_segmentation(self):
+        tmp_dir = self.get_auto_remove_tmp_dir()
+        testargs = f"""
+            run_instance_segmentation.py
+            --model_name_or_path qubvel-hf/finetune-instance-segmentation-ade20k-mini-mask2former
+            --output_dir {tmp_dir}
+            --dataset_name qubvel-hf/ade20k-nano
+            --do_reduce_labels
+            --image_height 256
+            --image_width 256
+            --do_train
+            --num_train_epochs 1
+            --learning_rate 1e-5
+            --lr_scheduler_type constant
+            --per_device_train_batch_size 2
+            --per_device_eval_batch_size 1
+            --do_eval
+            --eval_strategy epoch
+            --seed 32
+        """.split()
+
+        if is_torch_fp16_available_on_device(torch_device):
+            testargs.append("--fp16")
+
+        with patch.object(sys, "argv", testargs):
+            run_instance_segmentation.main()
             result = get_results(tmp_dir)
             self.assertGreaterEqual(result["test_map"], 0.1)

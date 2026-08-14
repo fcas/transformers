@@ -13,24 +13,27 @@ specific language governing permissions and limitations under the License.
 rendered properly in your Markdown viewer.
 
 -->
+*This model was published in HF papers on 2022-10-20 and contributed to Hugging Face Transformers on 2023-06-20.*
 
 # FLAN-T5
 
+
 ## Overview
 
-FLAN-T5 was released in the paper [Scaling Instruction-Finetuned Language Models](https://arxiv.org/pdf/2210.11416.pdf) - it is an enhanced version of T5 that has been finetuned in a mixture of tasks.
+FLAN-T5 was released in the paper [Scaling Instruction-Finetuned Language Models](https://huggingface.co/papers/2210.11416) - it is an enhanced version of T5 that has been finetuned in a mixture of tasks.
 
 One can directly use FLAN-T5 weights without finetuning the model:
 
 ```python
->>> from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
->>> model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-small")
->>> tokenizer = AutoTokenizer.from_pretrained("google/flan-t5-small")
 
->>> inputs = tokenizer("A step by step recipe to make bolognese pasta:", return_tensors="pt")
->>> outputs = model.generate(**inputs)
->>> print(tokenizer.batch_decode(outputs, skip_special_tokens=True))
+model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-small", device_map="auto")
+tokenizer = AutoTokenizer.from_pretrained("google/flan-t5-small")
+
+inputs = tokenizer("A step by step recipe to make bolognese pasta:", return_tensors="pt").to(model.device)
+outputs = model.generate(**inputs)
+print(tokenizer.batch_decode(outputs, skip_special_tokens=True))
 ['Pour a cup of bolognese into a large bowl and add the pasta']
 ```
 
